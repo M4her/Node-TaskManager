@@ -1,3 +1,4 @@
+const { mailSender } = require("../helpers/mailService");
 const { isValidEmail, generateOTP } = require("../helpers/utils");
 const authSchema = require("../models/authSchema");
 
@@ -31,6 +32,7 @@ const registration = async (req, res) => {
       otpExpiry: Date.now() + 5 * 60 * 1000,
     });
     user.save();
+    await mailSender({email, subject: 'OTP Verification Mail', otp: OTP_Num})
 
     res.status(200).send({ message: "Registration Sucessfull" });
   } catch (error) {
@@ -39,5 +41,9 @@ const registration = async (req, res) => {
   }
 };
 
+const verifyOTP = async()=>{
+
+}
+
 const login = async (req, res) => {};
-module.exports = { registration };
+module.exports = { registration, verifyOTP };
