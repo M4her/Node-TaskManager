@@ -32,7 +32,7 @@ const registration = async (req, res) => {
       otpExpiry: Date.now() + 5 * 60 * 1000,
     });
     user.save();
-    await mailSender({email, subject: 'OTP Verification Mail', otp: OTP_Num})
+    await mailSender({ email, subject: "OTP Verification Mail", otp: OTP_Num });
 
     res.status(200).send({ message: "Registration Sucessfull" });
   } catch (error) {
@@ -41,9 +41,43 @@ const registration = async (req, res) => {
   }
 };
 
-const verifyOTP = async()=>{
+const verifyOTP = async (req, res) => {
+  const { email, otp } = req.body;
+  try {
+    const user = await authSchema.findOneAndUpdate(
+      {
+        email,
+        otp,
+        otpExpiry: { $gt: Date.now() },
+      },
+      { isVerified: true, otp: null },
+      { returnDocument: "after" },
+    );
+    if (!user) return res.status(400).send({ message: "Invald request" });
+    res.status(200).send({ message: "Email Verified Succesfully" });
+  } catch (error) {
+    res.status(500).send({ message: "Internal Server Error!" });
+  }
+};
 
-}
+const login = async (req, res) => {
+  const { email, password } = req.body;
 
-const login = async (req, res) => {};
-module.exports = { registration, verifyOTP };
+  try {
+    const user = await authSchema.findOne({ email });
+    console.log(user);
+    if (!user) return res.status(400).send({ message: "Invald credential" });
+    if (!user.isVerified)
+      return res.status(400).send({ message: "Email is not verified" });
+
+    const matchPass = await user.comparePassword(password);
+
+    if (!matchPass)
+      return res.status(400).send({ message: "Invald credential" });
+
+    return res.status(200).send({ message: "Login Sucessfull!" });
+  } catch (error) {
+    res.status(500).send({ message: "Internal Server Error!" });
+  }
+};
+module.exports = { registration, verifyOTP, login };
