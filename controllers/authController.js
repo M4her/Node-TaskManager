@@ -1,5 +1,9 @@
 const { mailSender } = require("../helpers/mailService");
-const { isValidEmail, generateOTP } = require("../helpers/utils");
+const {
+  isValidEmail,
+  generateOTP,
+  generateAccessToken,
+} = require("../helpers/utils");
 const authSchema = require("../models/authSchema");
 
 const registration = async (req, res) => {
@@ -65,7 +69,6 @@ const login = async (req, res) => {
 
   try {
     const user = await authSchema.findOne({ email });
-    console.log(user);
     if (!user) return res.status(400).send({ message: "Invald credential" });
     if (!user.isVerified)
       return res.status(400).send({ message: "Email is not verified" });
@@ -75,9 +78,31 @@ const login = async (req, res) => {
     if (!matchPass)
       return res.status(400).send({ message: "Invald credential" });
 
+    const accessToken = generateAccessToken({
+      _id: user._id,
+      email: user.email,
+    });
+
+    res.cookie("accessToken", accessToken);
+
     return res.status(200).send({ message: "Login Sucessfull!" });
   } catch (error) {
     res.status(500).send({ message: "Internal Server Error!" });
   }
 };
-module.exports = { registration, verifyOTP, login };
+
+const userProfile = async (req, res) => {
+  try {
+    const userData = await authSchema
+      .findOne({ _id: req.user._id })
+      .select("avater email fullname");
+    if (!userData) {
+      return res.status(404).send({ message: "User not found" });
+    }
+    res.status(200).send(userData);
+  } catch (error) {
+    res.status(500).send({ message: "Internal Server Error!" });
+  }
+};
+
+module.exports = { registration, verifyOTP, login, userProfile };
