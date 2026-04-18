@@ -6,6 +6,8 @@ const {
 } = require("../helpers/utils");
 const authSchema = require("../models/authSchema");
 
+
+//      Registration
 const registration = async (req, res) => {
   const { fullName, email, password } = req.body;
 
@@ -45,6 +47,8 @@ const registration = async (req, res) => {
   }
 };
 
+
+//      OTP Verification
 const verifyOTP = async (req, res) => {
   const { email, otp } = req.body;
   try {
@@ -64,6 +68,8 @@ const verifyOTP = async (req, res) => {
   }
 };
 
+
+//      Login
 const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -91,6 +97,7 @@ const login = async (req, res) => {
   }
 };
 
+//     User Profile
 const userProfile = async (req, res) => {
   try {
     const userData = await authSchema
@@ -105,4 +112,20 @@ const userProfile = async (req, res) => {
   }
 };
 
-module.exports = { registration, verifyOTP, login, userProfile };
+
+//   Update UserProfile
+const updateProfile = async (req, res) =>{
+  const { fullName } = req.body;
+  const userId = req.user._id
+  try {
+
+    console.log(req.file)
+    res.send("Update profile route")
+    
+  } catch (error) {
+    
+  }
+
+}
+
+module.exports = { registration, verifyOTP, login, userProfile, updateProfile };
