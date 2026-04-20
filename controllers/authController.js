@@ -6,7 +6,7 @@ const {
 } = require("../helpers/utils");
 const authSchema = require("../models/authSchema");
 // const cloudinary = require("../configs/cloudinary");
-const { uploadToCloudinary } = require("../helpers/cloudinaryService");
+const { uploadToCloudinary, destroyFromCloudinary } = require("../helpers/cloudinaryService");
 
 //      Registration
 const registration = async (req, res) => {
@@ -117,21 +117,24 @@ const updateProfile = async (req, res) => {
   const userId = req.user._id;
   try {
     const userData = await authSchema.findOne({ _id: userId });
-        console.log(userData);
+        // console.log(userData);
 
 
-    let updateFields = {};
+    // let updateFields = {};
 
-    if (fullName.trim()) updateFields.fullName = fullName;
+    if (fullName.trim()) userData.fullName = fullName;
 
     if (req.file) {
       const avatarUrl = await uploadToCloudinary({
         mimetype: req.file.mimetype,
         imgBuffer: req.file.buffer,
       });
-      
-      updateFields.avatar = await avatarUrl.secure_url;
+      destroyFromCloudinary(userData.avatar)
+
+      userData.avatar = await avatarUrl.secure_url;
     }
+    userData.save()
+//   to only update and no replacing
 
     // const user = await authSchema.findOneAndUpdate(
     //   { _id: userId },
