@@ -1,10 +1,15 @@
-const cloudinary = require("cloudinary").v2
+const cloudinary = require("cloudinary").v2;
 
-const uploadToCloudinary = async ({mimetype, imgBuffer}) => {
- const dataUrl = `data:${mimetype};base64,${imgBuffer.toString("base64")}`;
-
+const uploadToCloudinary = async ({ mimetype, imgBuffer }) => {
+  const dataUrl = `data:${mimetype};base64,${imgBuffer.toString("base64")}`;
 
   return await cloudinary.uploader.upload(dataUrl);
+};
+
+const destroyFromCloudinary =  () => {
+  cloudinary.uploader.destroy("sample_public_id", (error, result) => {
+    console.log(result, error);
+  });
 };
 
 module.exports = { uploadToCloudinary };

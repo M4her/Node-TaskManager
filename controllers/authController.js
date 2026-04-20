@@ -116,13 +116,30 @@ const updateProfile = async (req, res) => {
   const { fullName } = req.body;
   const userId = req.user._id;
   try {
-    
+    const userData = await authSchema.findOne({ _id: userId });
+        console.log(userData);
 
-    const avatarUrl = await uploadToCloudinary({
-      mimetype: req.file.mimetype,
-      imgBuffer: req.file.buffer,
-    });
-    res.send(avatarUrl.secure_url)
+
+    let updateFields = {};
+
+    if (fullName.trim()) updateFields.fullName = fullName;
+
+    if (req.file) {
+      const avatarUrl = await uploadToCloudinary({
+        mimetype: req.file.mimetype,
+        imgBuffer: req.file.buffer,
+      });
+      
+      updateFields.avatar = await avatarUrl.secure_url;
+    }
+
+    // const user = await authSchema.findOneAndUpdate(
+    //   { _id: userId },
+    //   updateFields,
+    //   { returnDocument: "after" },
+    // );
+
+    res.status(200).send({ message: "Profile Updated Succesfully" });
   } catch (error) {
     console.log(error);
   }
