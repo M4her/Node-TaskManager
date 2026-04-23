@@ -122,7 +122,7 @@ const updateProfile = async (req, res) => {
 
     // let updateFields = {};
 
-    if (fullName.trim()) userData.fullName = fullName;
+    if (fullName && fullName.trim()) userData.fullName = fullName;
 
     if (req.file) {
       const avatarUrl = await uploadToCloudinary({

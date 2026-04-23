@@ -39,6 +39,11 @@ const projectSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  slug: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   author: {
     type: mongoose.Types.ObjectId,
     ref: "user",
@@ -50,6 +55,6 @@ const projectSchema = new mongoose.Schema({
       ref: "user",
     },
   ],
-    tasks:[ taskSchema ],
+  tasks: [taskSchema],
 });
 module.exports = mongoose.model("projects", projectSchema);

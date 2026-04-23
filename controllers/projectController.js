@@ -1,11 +1,14 @@
+const { generateSlug } = require("../helpers/utils");
 const projectSchema = require("../models/projectSchema");
 
 const createProject = async (req, res) => {
   const { title, description } = req.body;
   try {
+    const slug = generateSlug(title)
     const project = await projectSchema({
       title,
       description,
+      slug,
       author: req.user._id,
     });
     project.save();

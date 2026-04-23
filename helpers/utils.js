@@ -13,7 +13,15 @@ const generateAccessToken = (user) => {
   const token = jwt.sign(user, process.env.JWT_SEC);
   console.log(process.env.JWT_SEC);
   return token;
-  
 };
 
-module.exports = { isValidEmail, generateOTP, generateAccessToken };
+function generateSlug(title) {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "") // remove special chars
+    .replace(/\s+/g, "-") // spaces → hyphen
+    .replace(/-+/g, "-"); // remove duplicate hyphens
+}
+
+module.exports = { isValidEmail, generateOTP, generateAccessToken, generateSlug };
