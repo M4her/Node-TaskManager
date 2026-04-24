@@ -28,10 +28,12 @@ const projectList = async (req, res) => {
 
     const projects = await projectSchema
       .find({
-        author: req.user._id,
+        $or: [
+          { author: req.user._id },
+          { members: req.user._id },
+        ],
         title: {
-          $regex: search,
-          $options: "i",
+          $regex: search || "", $options: "i",
         },
       })
       .populate("author", "fullName avatar");
@@ -48,17 +50,26 @@ const addTeamMemberToProject = async (req, res) => {
   const { email, projectId } = req.body;
   try {
     const existEmail = await authSchema.findOne({ email });
-    if (!existEmail) return res.status(400).send({ message: "Email doesn't exist" });
-    
-    const existMembers = await  projectSchema.findOne({members: existEmail._id})
-    if (existMembers) return res.status(400).send({ message: "This Member Already Exist" });
+    if (!existEmail)  return res.status(400).send({ message: "Email doesn't exist" });
 
-    const project = await projectSchema.findOneAndUpdate({ _id: projectId }, { members:existEmail._id }, {returnDocument: 'after'});
+    const existMembers = await projectSchema.findOne({
+      $or: [
+          { author: existEmail._id },
+          { members: existEmail._id },
+        ],
+    });
+    
+    if (existMembers)
+      return res.status(400).send({ message: "This Member Already Exist" });
+
+    const project = await projectSchema.findOneAndUpdate(
+      { _id: projectId },
+      { members: existEmail._id },
+      { returnDocument: "after" },
+    );
     if (!project) return res.status(400).send({ message: "Invalid Request" });
 
-    res.status(200).send({message: "Team Member Added Successfully"})
-
-
+    res.status(200).send({ message: "Team Member Added Successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).send({ message: "Internal Server Error" });
