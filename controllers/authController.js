@@ -142,7 +142,7 @@ const updateProfile = async (req, res) => {
     //   { returnDocument: "after" },
     // );
 
-    res.status(200).send({ message: "Profile Updated Succesfully" });
+    res.status(200).send({ message: "Profile Updated Successfully" });
   } catch (error) {
     console.log(error);
   }
