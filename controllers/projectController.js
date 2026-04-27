@@ -76,4 +76,7 @@ const addTeamMemberToProject = async (req, res) => {
   }
 };
 
+const addTaskToProject = async (res, req)=>{
+
+}
 module.exports = { createProject, projectList, addTeamMemberToProject };
