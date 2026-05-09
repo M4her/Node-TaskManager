@@ -5,28 +5,37 @@ const {
   generateAccessToken,
 } = require("../helpers/utils");
 const authSchema = require("../models/authSchema");
-// const cloudinary = require("../configs/cloudinary");
-const { uploadToCloudinary, destroyFromCloudinary } = require("../helpers/cloudinaryService");
-
-//      Registration
+const {
+  uploadToCloudinary,
+  destroyFromCloudinary,
+} = require("../helpers/cloudinaryService");
 const registration = async (req, res) => {
   const { fullName, email, password } = req.body;
-
   try {
     if (!fullName?.trim())
-      return res.status(400).send({ message: "FullName is required ", field: "fullName" });
-    if (!email) return res.status(400).send({ message: "Email is required ", field: "email"});
+      return res
+        .status(400)
+        .send({ message: "FullName is required.", field: "fullName" });
+    if (!email)
+      return res
+        .status(400)
+        .send({ message: "Email is required.", field: "email" });
     if (!isValidEmail(email))
-      return res.status(400).send({ message: "Email is invalid ", field: "email" });
+      return res
+        .status(400)
+        .send({ message: "Email is invalid.", field: "email" });
     if (!password)
-      return res.status(400).send({ message: "Password is required ",field: "password" });
+      return res
+        .status(400)
+        .send({ message: "Password is required.", field: "password" });
 
-    // does email already exist check
-
+    // Check if email already exist
     const existingEmail = await authSchema.findOne({ email });
 
     if (existingEmail)
-      return res.status(400).send({ message: "This is email already exist! "});
+      return res
+        .status(400)
+        .send({ message: "This email already registered", field: "email" });
 
     // Generate OTP
     const OTP_Num = generateOTP();
@@ -39,16 +48,18 @@ const registration = async (req, res) => {
       otpExpiry: Date.now() + 5 * 60 * 1000,
     });
     user.save();
+
     await mailSender({ email, subject: "OTP Verification Mail", otp: OTP_Num });
 
-    res.status(200).send({ message: "Registration Successful" });
+    res
+      .status(200)
+      .send({ message: "Registration Successfully Please verify your email" });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ message: "Internal Server Error" });
+    res.status(500).send({ message: "Internal Server Error!" });
   }
 };
 
-//      OTP Verification
 const verifyOTP = async (req, res) => {
   const { email, otp } = req.body;
   try {
@@ -62,26 +73,31 @@ const verifyOTP = async (req, res) => {
       { returnDocument: "after" },
     );
     if (!user) return res.status(400).send({ message: "Invalid request" });
-    res.status(200).send({ message: "Email Verified Successfully" });
+
+    res.status(200).send({ message: "Email verified successfully." });
   } catch (error) {
     res.status(500).send({ message: "Internal Server Error!" });
   }
 };
 
-//      Login
 const login = async (req, res) => {
   const { email, password } = req.body;
-
   try {
     const user = await authSchema.findOne({ email });
-    if (!user) return res.status(400).send({ message: "Email is not registered.", field: "email" });
+    if (!user)
+      return res
+        .status(400)
+        .send({ message: "Email is not register", field: "email" });
     if (!user.isVerified)
-      return res.status(400).send({ message: "Email is not verified", field: "email" });
-
+      return res
+        .status(400)
+        .send({ message: "Email is not verified.", field: "email" });
     const matchPass = await user.comparePassword(password);
 
     if (!matchPass)
-      return res.status(400).send({ message: "Invalid credential", field: "password" });
+      return res
+        .status(400)
+        .send({ message: "Invalid Credential", field: "password" });
 
     const accessToken = generateAccessToken({
       _id: user._id,
@@ -90,37 +106,35 @@ const login = async (req, res) => {
 
     res.cookie("accessToken", accessToken);
 
-    return res.status(200).send({ message: "Login Successful!" });
+    res.status(200).send({ message: "Login Successfully" });
   } catch (error) {
+    console.log(error);
+
     res.status(500).send({ message: "Internal Server Error!" });
   }
 };
 
-//     User Profile
 const userProfile = async (req, res) => {
   try {
     const userData = await authSchema
       .findOne({ _id: req.user._id })
-      .select("avatar email fullname");
+      .select("avatar email fullName");
+
     if (!userData) {
       return res.status(404).send({ message: "User not found" });
     }
+
     res.status(200).send(userData);
   } catch (error) {
     res.status(500).send({ message: "Internal Server Error!" });
   }
 };
 
-//   Update UserProfile
 const updateProfile = async (req, res) => {
   const { fullName } = req.body;
   const userId = req.user._id;
   try {
     const userData = await authSchema.findOne({ _id: userId });
-        // console.log(userData);
-
-
-    // let updateFields = {};
 
     if (fullName && fullName.trim()) userData.fullName = fullName;
 
@@ -129,20 +143,15 @@ const updateProfile = async (req, res) => {
         mimetype: req.file.mimetype,
         imgBuffer: req.file.buffer,
       });
-      destroyFromCloudinary(userData.avatar)
+
+      destroyFromCloudinary(userData.avatar);
 
       userData.avatar = await avatarUrl.secure_url;
     }
-    userData.save()
-//   to only update and no replacing
 
-    // const user = await authSchema.findOneAndUpdate(
-    //   { _id: userId },
-    //   updateFields,
-    //   { returnDocument: "after" },
-    // );
+    userData.save();
 
-    res.status(200).send({ message: "Profile Updated Successfully" });
+    res.status(200).send({ message: "Profile updated successfully" });
   } catch (error) {
     console.log(error);
   }
