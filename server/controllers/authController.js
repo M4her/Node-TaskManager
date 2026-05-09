@@ -74,14 +74,14 @@ const login = async (req, res) => {
 
   try {
     const user = await authSchema.findOne({ email });
-    if (!user) return res.status(400).send({ message: "Invalid credential" });
+    if (!user) return res.status(400).send({ message: "Email is not registered.", field: "email" });
     if (!user.isVerified)
-      return res.status(400).send({ message: "Email is not verified" });
+      return res.status(400).send({ message: "Email is not verified", field: "email" });
 
     const matchPass = await user.comparePassword(password);
 
     if (!matchPass)
-      return res.status(400).send({ message: "Invalid credential" });
+      return res.status(400).send({ message: "Invalid credential", field: "password" });
 
     const accessToken = generateAccessToken({
       _id: user._id,

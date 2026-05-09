@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 import { Link } from "react-router";
@@ -6,7 +6,6 @@ import { useRegistrationMutation } from "../services/api";
 
 const Registration = () => {
   const [registerUser] = useRegistrationMutation();
-
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -14,15 +13,9 @@ const Registration = () => {
   });
 
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
 
-  
-
-  const handleChange = (e) => {
-    setForm((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+  const handleChange = (field) => (e) => {
+    setForm({ ...form, [field]: e.target.value });
   };
 
   const validate = () => {
@@ -30,14 +23,12 @@ const Registration = () => {
 
     if (!form.fullName.trim()) {
       newErrors.fullName = "Full name is required";
-    } else if (form.fullName.trim().length < 2) {
-      newErrors.fullName = "Full name must be at least 2 characters";
     }
 
-    if (!form.email) {
+    if (!form.email.trim()) {
       newErrors.email = "Email is required";
-    } else if (!form.email.includes("@") || !form.email.includes(".")) {
-      newErrors.email = "Enter a valid email";
+    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+      newErrors.email = "Invalid email address";
     }
 
     if (!form.password) {
@@ -57,10 +48,7 @@ const Registration = () => {
       setErrors(validationErrors);
       return;
     }
-
     setErrors({});
-    setLoading(true);
-
     const res = await registerUser(form);
     if (res.error) {
       const field = res.error.data.field;
@@ -70,56 +58,52 @@ const Registration = () => {
       if (field == "password")
         return setErrors({ password: res.error.data.message });
     }
-
-    setLoading(false);
-    console.log("Registration Success")
+    console.log("Registration successfully");
+    
   };
 
- 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="h-screen flex items-center justify-center">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm bg-white p-6 rounded-2xl shadow-md flex flex-col gap-4"
+        className="bg-white flex flex-col rounded-xl shadow space-y-4 max-w-md mx-auto p-6 w-full"
       >
-        <h2 className="text-xl font-semibold text-center">Create Account</h2>
+        <h2 className="text-xl font-semibold text-gray-800">
+          Create an account
+        </h2>
 
         <Input
           label="Full Name"
-          name="fullName"
-          placeholder="Enter your full name"
           value={form.fullName}
-          onChange={handleChange}
+          onChange={handleChange("fullName")}
+          placeholder="John Doe"
           error={errors.fullName}
         />
 
         <Input
           label="Email"
-          name="email"
           type="email"
-          placeholder="Enter your email"
           value={form.email}
-          onChange={handleChange}
+          onChange={handleChange("email")}
+          placeholder="example@email.com"
           error={errors.email}
         />
 
         <Input
           label="Password"
-          name="password"
           type="password"
-          placeholder="Enter your password"
           value={form.password}
-          onChange={handleChange}
+          onChange={handleChange("password")}
+          placeholder="••••••••"
           error={errors.password}
         />
 
-        <Button type="submit" loading={loading} buttonClassName="w-full">
+        <Button type="submit" fullWidth>
           Register
         </Button>
         <p className="ml-auto">
-          {" "}
-          Already have an account?
-          <Link to="/login" className="text-blue-500 ml-2">
+          Already have an account?{" "}
+          <Link to="/login" className="text-blue-500">
             Login
           </Link>
         </p>
