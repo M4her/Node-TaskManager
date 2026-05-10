@@ -5,9 +5,7 @@ import UserAvatarGroup from "../components/ui/UserAvatarGroup";
 import PriorityBadge from "../components/ui/PriorityBadge";
 
 const Project = () => {
-  const { data } = useGetProjectDetailsQuery(
-    "taskmanager-website-local-client",
-  );
+  const { data } = useGetProjectDetailsQuery("e-commerce",);
 
   return;
   <div className="py-40">
@@ -52,10 +50,12 @@ const Project = () => {
             <div>
               <h1 className="text-2xl">{item?.title}</h1>
               <p>{item?.description}</p>
+              Assigned to : <UserAvatarGroup members={item?.assignTo}/>
               <div>
-                <div>
+                <div className="space-y-4">
                 Priority: <PriorityBadge priority={item.priority}/>
                 <p>{item?.isComplete ? "Completed": "Incomplete"}</p>
+                <Button>Assign Member</Button>
 
                 </div>
               </div>
