@@ -4,6 +4,7 @@ import Registration from "./pages/Registration";
 import Login from "./pages/Login";
 import OtpVerification from "./pages/OtpVerification";
 import Dashboard from "./pages/Dashboard";
+import Project from "./pages/Project";
 
 const App = () => {
   return (
@@ -13,6 +14,8 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/email-verification" element={<OtpVerification />} />
         <Route path="/" element={<Dashboard />} />
+        <Route path="/:slug" element={<Project />} />
+
       </Routes>
     </BrowserRouter>
   );

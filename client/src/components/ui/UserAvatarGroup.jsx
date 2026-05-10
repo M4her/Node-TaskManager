@@ -1,4 +1,3 @@
-// src/components/UserAvatarGroup.jsx
 const UserAvatarGroup = ({ members }) => {
   console.log("members", members);
 
